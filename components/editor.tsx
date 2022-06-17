@@ -150,11 +150,6 @@ function onKeyParagraph(
   editor: Editor,
   node: NodeEntry<Paragraph>
 ): void {
-  if (isHotkey("enter", event)) {
-    event.preventDefault();
-    Transforms.insertText(editor, "\n");
-    return;
-  }
 
   if (isHotkey("space", event)) {
     const text = Node.string(node[0]);
@@ -166,6 +161,7 @@ function onKeyParagraph(
     console.log(lineText);
 
     const headerRegex = /^#+ /g;
+    const codeRegex = /^``` /g
 
     if ((lineText + " ").search(headerRegex) >= 0) {
       const headerType = lineText.length > 6 ? 6 : lineText.length;
@@ -177,16 +173,9 @@ function onKeyParagraph(
             : lineText.length,
         reverse: true,
       });
-      Transforms.splitNodes(editor);
-      Transforms.insertNodes(editor, {
-        type: ElementTypes.header,
-        headerLevel: headerType - 1,
-        children: [
-          {
-            text: "",
-          },
-        ],
-      });
+      Transforms.setNodes(editor,
+        { type: ElementTypes.header, headerLevel: headerType - 1},
+        {match: n => Element.isElement(n) && n.type == ElementTypes.paragraph})
     }
   }
 }
